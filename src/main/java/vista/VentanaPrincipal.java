@@ -17,14 +17,17 @@ public class VentanaPrincipal extends JFrame {
         setLayout(new BorderLayout());
 
         add(crearBarraLateral(), BorderLayout.WEST);
+
         contenido.setLayout(tarjetas);
         contenido.setBackground(Estilo.CREMA);
+
         contenido.add(new PanelInicio(), "inicio");
         contenido.add(new PanelDesayunos(), "desayunos");
-        contenido.add(new PanelInformativo("Pedidos", "Aquí aparecerán los pedidos registrados y sus estados."), "pedidos");
+        contenido.add(new PanelPedidos(), "pedidos"); // <-- Tu nuevo panel
         contenido.add(new PanelInformativo("Clientes", "Aquí se consultarán los clientes registrados."), "clientes");
         contenido.add(new PanelInformativo("Repartidores", "Aquí se podrán consultar y asignar repartidores."), "repartidores");
         contenido.add(new PanelInformativo("Ventas", "Aquí se mostrará el historial y el total de ventas."), "ventas");
+
         add(contenido, BorderLayout.CENTER);
         mostrar("inicio");
     }

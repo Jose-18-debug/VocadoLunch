@@ -13,7 +13,7 @@ public final class Conexion {
     private Conexion() {}
 
     public static Connection conectar() throws SQLException {
-        String url = config("VOCADO_DB_URL", "vocado.db.url", URL_PREDETERMINADA);
+        String url = URL_PREDETERMINADA;
         String usuario = config("VOCADO_DB_USER", "vocado.db.user", "root");
         String password = config("VOCADO_DB_PASSWORD", "vocado.db.password", ""); //Aquí va tu contraseña local de tu BD
         return DriverManager.getConnection(url, usuario, password);
