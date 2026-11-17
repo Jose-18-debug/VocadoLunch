@@ -6,16 +6,14 @@ import java.sql.SQLException;
 
 public final class Conexion {
     private static final String URL_PREDETERMINADA =
-            "jdbc:mysql://localhost:3306/vocado_lunch_db"
-                    + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-                    + "&characterEncoding=UTF-8";
+            "jdbc:mysql://localhost:3306/vocado_lunch_db" + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" + "&characterEncoding=UTF-8";
 
     private Conexion() {}
 
     public static Connection conectar() throws SQLException {
         String url = URL_PREDETERMINADA;
         String usuario = config("VOCADO_DB_USER", "vocado.db.user", "root");
-        String password = config("VOCADO_DB_PASSWORD", "vocado.db.password", "moises1234"); //Aquí va tu contraseña local de tu BD
+        String password = config("VOCADO_DB_PASSWORD", "vocado.db.password", ""); //Aquí va tu contraseña local de tu BD
         return DriverManager.getConnection(url, usuario, password);
     }
 
