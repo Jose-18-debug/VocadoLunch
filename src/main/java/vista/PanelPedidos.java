@@ -1,189 +1,80 @@
 package vista;
 
+import dao.DesayunoDAO;
 import dao.PedidoDAO;
-import modelo.Pedido;
+import dao.UsuarioDAO;
+import modelo.Desayuno;
 import modelo.DetallePedido;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import modelo.Pedido;
+import modelo.Usuario;
+import javax.swing.*; import javax.swing.table.DefaultTableModel; import javax.swing.border.EmptyBorder;
+import java.awt.*; import java.time.LocalDateTime; import java.time.format.DateTimeFormatter;
+import java.util.*; import java.util.List;
 
 public class PanelPedidos extends JPanel {
+    private final UsuarioDAO usuarioDAO=new UsuarioDAO();
+    private final DesayunoDAO desayunoDAO=new DesayunoDAO();
+    private final PedidoDAO pedidoDAO=new PedidoDAO();
+    private final JComboBox<Usuario> clientes=new JComboBox<>();
+    private final JComboBox<Desayuno> desayunos=new JComboBox<>();
+    private final JSpinner cantidad=new JSpinner(new SpinnerNumberModel(1,1,99,1));
+    private final JComboBox<String> metodo=new JComboBox<>(new String[]{"EFECTIVO","TRANSFERENCIA"});
+    private final DefaultTableModel tm=new DefaultTableModel(new Object[]{"ID desayuno","Desayuno","Precio","Cantidad","Subtotal"},0){public boolean isCellEditable(int r,int c){return false;}};
+    private final JTable tabla=new JTable(tm);
+    private final Map<Integer,DetallePedido> carrito=new LinkedHashMap<>();
+    private final JLabel total=new JLabel("$0.00");
 
-    private JTextField txtIdCliente;
-    private JTextField txtIdRepartidor;
-    private JTextArea areaDetalles;
-    private JLabel lblTotal;
-    private JButton btnGuardar;
-
-    public PanelPedidos() {
-        // Usamos GridBagLayout para centrar una "tarjeta" de contenido
-        setLayout(new GridBagLayout());
-        setBackground(Estilo.CREMA);
-        setBorder(new EmptyBorder(20, 20, 20, 20));
-
-        // --- TARJETA CONTENEDORA ---
-        JPanel tarjeta = new JPanel(new BorderLayout(15, 15));
-        tarjeta.setBackground(Color.WHITE);
-        tarjeta.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
-                new EmptyBorder(25, 25, 25, 25)
-        ));
-        tarjeta.setPreferredSize(new Dimension(650, 500)); // Tamaño fijo para que no se estire
-
-        // --- TÍTULO ---
-        JLabel titulo = new JLabel("Registrar Nuevo Pedido");
-        titulo.setFont(new Font("SansSerif", Font.BOLD, 22));
-        titulo.setForeground(Estilo.NARANJA_OSCURO);
-        tarjeta.add(titulo, BorderLayout.NORTH);
-
-        // --- PANEL CENTRAL (Formulario + Detalles) ---
-        JPanel centro = new JPanel(new BorderLayout(10, 10));
-        centro.setOpaque(false);
-
-        // Formulario arriba
-        JPanel formulario = new JPanel(new GridLayout(3, 2, 10, 15));
-        formulario.setOpaque(false);
-
-        JLabel lblCliente = new JLabel("ID del Cliente:");
-        lblCliente.setFont(new Font("SansSerif", Font.BOLD, 14));
-        formulario.add(lblCliente);
-
-        txtIdCliente = new JTextField("1");
-        txtIdCliente.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        formulario.add(txtIdCliente);
-
-        JLabel lblRepartidor = new JLabel("ID del Repartidor (0 = sin asignar):");
-        lblRepartidor.setFont(new Font("SansSerif", Font.BOLD, 14));
-        formulario.add(lblRepartidor);
-
-        txtIdRepartidor = new JTextField("0");
-        txtIdRepartidor.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        formulario.add(txtIdRepartidor);
-
-        JLabel lblTotalTexto = new JLabel("Total Calculado:");
-        lblTotalTexto.setFont(new Font("SansSerif", Font.BOLD, 14));
-        formulario.add(lblTotalTexto);
-
-        lblTotal = new JLabel("$ 0.00");
-        lblTotal.setFont(new Font("SansSerif", Font.BOLD, 18));
-        lblTotal.setForeground(new Color(200, 50, 50));
-        formulario.add(lblTotal);
-
-        centro.add(formulario, BorderLayout.NORTH);
-
-        // Área de detalles (simulación)
-        areaDetalles = new JTextArea();
-        areaDetalles.setText("--- Simulación de Carrito ---\n" +
-                "2 x Desayuno ID 1 (Subtotal: $100.0)\n" +
-                "1 x Desayuno ID 2 (Subtotal: $60.0)\n" +
-                "-----------------------------");
-        areaDetalles.setEditable(false);
-        areaDetalles.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        areaDetalles.setBackground(new Color(250, 250, 250));
-
-        JScrollPane scrollDetalles = new JScrollPane(areaDetalles);
-        scrollDetalles.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY),
-                "Productos del Pedido",
-                TitledBorder.LEFT, TitledBorder.TOP,
-                new Font("SansSerif", Font.BOLD, 12))
-        );
-        centro.add(scrollDetalles, BorderLayout.CENTER);
-
-        tarjeta.add(centro, BorderLayout.CENTER);
-
-        // --- PANEL INFERIOR (Botón) ---
-        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panelBoton.setOpaque(false);
-
-        btnGuardar = new JButton("Guardar Pedido");
-        btnGuardar.setBackground(Estilo.NARANJA_OSCURO);
-        btnGuardar.setForeground(Color.WHITE);
-        btnGuardar.setFont(new Font("SansSerif", Font.BOLD, 15));
-        btnGuardar.setOpaque(true);
-        btnGuardar.setContentAreaFilled(true);
-        btnGuardar.setFocusPainted(false);
-        btnGuardar.setUI(new javax.swing.plaf.basic.BasicButtonUI());
-        btnGuardar.setPreferredSize(new Dimension(180, 45));
-        btnGuardar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        btnGuardar.addActionListener(e -> guardarPedidoPrueba());
-
-        panelBoton.add(btnGuardar);
-        tarjeta.add(panelBoton, BorderLayout.SOUTH);
-
-        // Agregamos la tarjeta al panel principal (GridBagLayout la centra)
-        add(tarjeta);
+    public PanelPedidos(){
+        setLayout(new BorderLayout(12,12));setBackground(Estilo.CREMA);setBorder(new EmptyBorder(25,28,22,28));
+        JLabel titulo=new JLabel("Registrar pedido");titulo.setFont(Estilo.TITULO);titulo.setForeground(Estilo.TEXTO);
+        JPanel top=new JPanel(new GridLayout(2,4,8,6));top.setOpaque(false);
+        top.add(new JLabel("Cliente"));top.add(new JLabel("Desayuno"));top.add(new JLabel("Cantidad"));top.add(new JLabel("Método de pago"));
+        top.add(clientes);top.add(desayunos);top.add(cantidad);top.add(metodo);
+        JPanel north=new JPanel(new BorderLayout(0,12));north.setOpaque(false);north.add(titulo,BorderLayout.NORTH);north.add(top,BorderLayout.CENTER);
+        add(north,BorderLayout.NORTH);
+        tabla.setRowHeight(27);add(new JScrollPane(tabla),BorderLayout.CENTER);
+        JButton agregar=new JButton("Agregar al pedido"),quitar=new JButton("Quitar producto"),guardar=new JButton("Guardar pedido"),limpiar=new JButton("Limpiar"),recargar=new JButton("Recargar listas");
+        JPanel south=new JPanel(new BorderLayout());south.setOpaque(false);
+        JPanel buttons=new JPanel(new FlowLayout(FlowLayout.LEFT));buttons.setOpaque(false);buttons.add(agregar);buttons.add(quitar);buttons.add(limpiar);buttons.add(recargar);buttons.add(guardar);
+        total.setFont(new Font("SansSerif",Font.BOLD,20));total.setForeground(Estilo.NARANJA_OSCURO);
+        south.add(buttons,BorderLayout.CENTER);south.add(total,BorderLayout.EAST);add(south,BorderLayout.SOUTH);
+        agregar.addActionListener(e->agregarProducto());quitar.addActionListener(e->quitarProducto());limpiar.addActionListener(e->limpiar());recargar.addActionListener(e->cargarCombos());guardar.addActionListener(e->guardar());
+        cargarCombos();
     }
-
-    private void guardarPedidoPrueba() {
-        try {
-            int idCliente = Integer.parseInt(txtIdCliente.getText().trim());
-            int idRepartidor = Integer.parseInt(txtIdRepartidor.getText().trim());
-
-            if (idCliente <= 0) {
-                JOptionPane.showMessageDialog(this, "El ID del cliente debe ser mayor a 0.");
-                return;
-            }
-
-            // 1. Formatear la fecha
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String fechaActual = LocalDateTime.now().format(formatter);
-
-            // 2. Crear el Pedido
-            Pedido nuevoPedido = new Pedido();
-            nuevoPedido.setIdCliente(idCliente);
-            nuevoPedido.setIdRepartidor(idRepartidor);
-            nuevoPedido.setFechaHora(fechaActual);
-            nuevoPedido.setEstado("Recibido");
-
-            // 3. Simular los detalles (Aquí luego conectarás tu JTable)
-            List<DetallePedido> listaDetalles = new ArrayList<>();
-
-            DetallePedido d1 = new DetallePedido();
-            d1.setIdDesayuno(1);
-            d1.setCantidad(2);
-            d1.setSubtotal(100.0f);
-            listaDetalles.add(d1);
-
-            DetallePedido d2 = new DetallePedido();
-            d2.setIdDesayuno(2);
-            d2.setCantidad(1);
-            d2.setSubtotal(60.0f);
-            listaDetalles.add(d2);
-
-            // 4. Calcular total
-            float totalCalculado = 0;
-            for (DetallePedido d : listaDetalles) {
-                totalCalculado += d.getSubtotal();
-            }
-            nuevoPedido.setTotal(totalCalculado);
-            lblTotal.setText("$ " + totalCalculado);
-
-            // 5. Guardar en BD
-            PedidoDAO dao = new PedidoDAO();
-            boolean exito = dao.guardarPedido(nuevoPedido, listaDetalles);
-
-            if (exito) {
-                JOptionPane.showMessageDialog(this,
-                        "¡Pedido guardado con éxito!\nTotal: $" + totalCalculado,
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Error al guardar. Revisa la consola de IntelliJ.\n(Asegúrate de que el cliente y los desayunos existan en la BD)",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Ingresa números válidos en los campos.", "Error", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+    private void cargarCombos(){
+        try{clientes.removeAllItems();for(Usuario u:usuarioDAO.listarClientes())clientes.addItem(u);
+            desayunos.removeAllItems();for(Desayuno d:desayunoDAO.listarDisponibles())desayunos.addItem(d);
+            if(clientes.getItemCount()==0) JOptionPane.showMessageDialog(this,"Registra primero al menos un cliente en la sección Clientes.");
+        }catch(Exception e){JOptionPane.showMessageDialog(this,"No se pudieron cargar clientes/desayunos: "+e.getMessage(),"MySQL",JOptionPane.ERROR_MESSAGE);}
+    }
+    private void agregarProducto(){
+        Desayuno d=(Desayuno)desayunos.getSelectedItem();if(d==null){JOptionPane.showMessageDialog(this,"No hay desayunos disponibles.");return;}
+        int cant=(Integer)cantidad.getValue();DetallePedido existente=carrito.get(d.getId());
+        if(existente==null)carrito.put(d.getId(),new DetallePedido(d.getId(),cant,(float)(d.getPrecio()*cant)));
+        else {int nueva=existente.getCantidad()+cant;existente.setCantidad(nueva);existente.setSubtotal((float)(d.getPrecio()*nueva));}
+        refrescarCarrito();
+    }
+    private void quitarProducto(){int row=tabla.getSelectedRow();if(row<0)return;int id=(int)tm.getValueAt(row,0);carrito.remove(id);refrescarCarrito();}
+    private void refrescarCarrito(){
+        tm.setRowCount(0);double suma=0;
+        for(DetallePedido d:carrito.values()){
+            Desayuno encontrado=null;for(int i=0;i<desayunos.getItemCount();i++)if(desayunos.getItemAt(i).getId()==d.getIdDesayuno())encontrado=desayunos.getItemAt(i);
+            String nombre=encontrado==null?"Desayuno #"+d.getIdDesayuno():encontrado.getNombre();
+            double precio=encontrado==null?(d.getCantidad()==0?0:d.getSubtotal()/d.getCantidad()):encontrado.getPrecio();
+            tm.addRow(new Object[]{d.getIdDesayuno(),nombre,String.format("$%.2f",precio),d.getCantidad(),String.format("$%.2f",d.getSubtotal())});suma+=d.getSubtotal();
         }
+        total.setText(String.format("Total: $%.2f",suma));
+    }
+    private void quitarProductoSeguro(){quitarProducto();}
+    private void limpiar(){carrito.clear();refrescarCarrito();}
+    private void guardar(){
+        Usuario u=(Usuario)clientes.getSelectedItem();if(u==null){JOptionPane.showMessageDialog(this,"Selecciona un cliente registrado.");return;}
+        if(carrito.isEmpty()){JOptionPane.showMessageDialog(this,"Agrega al menos un desayuno.");return;}
+        Pedido p=new Pedido();p.setIdCliente(u.getId());p.setFechaHora(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        p.setEstado("Recibido");p.setMetodoPago((String)metodo.getSelectedItem());
+        try{int id=pedidoDAO.guardarPedido(p,new ArrayList<>(carrito.values()));
+            JOptionPane.showMessageDialog(this,"Pedido registrado correctamente.\nFolio: "+id+"\nTotal: "+total.getText()+"\nPago: pendiente.");
+            limpiar();cargarCombos();
+        }catch(Exception e){JOptionPane.showMessageDialog(this,"No se pudo guardar el pedido:\n"+e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);}
     }
 }
