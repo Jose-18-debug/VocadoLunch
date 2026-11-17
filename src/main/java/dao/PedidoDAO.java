@@ -5,6 +5,7 @@ import modelo.Pedido;
 import modelo.DetallePedido;
 import java.sql.*;
 import java.util.List;
+import java.util.ArrayList;
 
 public class PedidoDAO {
 
@@ -82,6 +83,54 @@ public class PedidoDAO {
             try { if (psDetalle != null) psDetalle.close(); } catch (SQLException e) {}
             try { if (psPedido != null) psPedido.close(); } catch (SQLException e) {}
             try { if (conn != null) conn.close(); } catch (SQLException e) {}
+        }
+    }
+
+    public List<Pedido> listarPedidos() throws SQLException {
+        List<Pedido> lista = new ArrayList<>();
+        String sql = "SELECT id_pedidos, id_cliente, id_repartidor, fecha_hora, total, estado FROM pedidos ORDER BY id_pedidos DESC";
+
+        try (Connection cn = Conexion.conectar();
+             Statement stmt = cn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Pedido p = new Pedido();
+                p.setIdPedidos(rs.getInt("id_pedidos"));
+                p.setIdCliente(rs.getInt("id_cliente"));
+                p.setIdRepartidor(rs.getInt("id_repartidor"));
+                p.setFechaHora(rs.getString("fecha_hora"));
+                p.setTotal(rs.getFloat("total"));
+                p.setEstado(rs.getString("estado"));
+                lista.add(p);
+            }
+        }
+        return lista;
+    }
+
+    public boolean actualizarEstado(int idPedido, String nuevoEstado) {
+        String sql = "UPDATE pedidos SET estado = ? WHERE id_pedidos = ?";
+        try (Connection cn = Conexion.conectar();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, nuevoEstado);
+            ps.setInt(2, idPedido);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean asignarRepartidor(int idPedido, int idRepartidor) {
+        String sql = "UPDATE pedidos SET id_repartidor = ? WHERE id_pedidos = ?";
+        try (Connection cn = Conexion.conectar();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idRepartidor);
+            ps.setInt(2, idPedido);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

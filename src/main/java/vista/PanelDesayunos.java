@@ -75,7 +75,10 @@ public class PanelDesayunos extends JPanel {
         b.setFont(new Font("SansSerif", Font.BOLD, 12));
         b.setForeground(Color.WHITE);
         b.setBackground(color);
+        b.setOpaque(true);
+        b.setContentAreaFilled(true);
         b.setFocusPainted(false);
+        b.setUI(new javax.swing.plaf.basic.BasicButtonUI());
         b.setBorder(new EmptyBorder(10, 14, 10, 14));
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return b;

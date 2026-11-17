@@ -105,7 +105,10 @@ public class PanelPedidos extends JPanel {
         btnGuardar.setBackground(Estilo.NARANJA_OSCURO);
         btnGuardar.setForeground(Color.WHITE);
         btnGuardar.setFont(new Font("SansSerif", Font.BOLD, 15));
+        btnGuardar.setOpaque(true);
+        btnGuardar.setContentAreaFilled(true);
         btnGuardar.setFocusPainted(false);
+        btnGuardar.setUI(new javax.swing.plaf.basic.BasicButtonUI());
         btnGuardar.setPreferredSize(new Dimension(180, 45));
         btnGuardar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
