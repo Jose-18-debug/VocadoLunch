@@ -14,8 +14,8 @@ public class PanelClientes extends JPanel {
     private final DefaultTableModel tm=new DefaultTableModel(new Object[]{"ID","Nombre","Teléfono","Dirección","Correo"},0){public boolean isCellEditable(int r,int c){return false;}};
     public PanelClientes(){setLayout(new BorderLayout(12,12));setBackground(Estilo.CREMA);setBorder(new EmptyBorder(28,30,25,30));
         JLabel title=new JLabel("Clientes");title.setFont(Estilo.TITULO);title.setForeground(Estilo.TEXTO);
-        JTable table=new JTable(tm);table.setRowHeight(28);add(title,BorderLayout.NORTH);add(new JScrollPane(table),BorderLayout.CENTER);
-        JButton add=new JButton("Registrar cliente"), refresh=new JButton("Actualizar");
+        JTable table=new JTable(tm);Estilo.estilizarTabla(table);add(title,BorderLayout.NORTH);add(new JScrollPane(table),BorderLayout.CENTER);
+        JButton add=Estilo.boton("＋ Registrar cliente",Estilo.NARANJA), refresh=Estilo.boton("↻ Actualizar",new Color(120,130,120));
         JPanel actions=new JPanel(new FlowLayout(FlowLayout.LEFT));actions.setOpaque(false);actions.add(add);actions.add(refresh);add(actions,BorderLayout.SOUTH);
         add.addActionListener(e->registrar());refresh.addActionListener(e->cargar());cargar();
     }

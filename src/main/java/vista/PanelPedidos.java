@@ -7,11 +7,16 @@ import modelo.Desayuno;
 import modelo.DetallePedido;
 import modelo.Pedido;
 import modelo.Usuario;
-import javax.swing.*; import javax.swing.table.DefaultTableModel; import javax.swing.border.EmptyBorder;
-import java.awt.*; import java.time.LocalDateTime; import java.time.format.DateTimeFormatter;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*; import java.util.List;
 
 public class PanelPedidos extends JPanel {
+
     private final UsuarioDAO usuarioDAO=new UsuarioDAO();
     private final DesayunoDAO desayunoDAO=new DesayunoDAO();
     private final PedidoDAO pedidoDAO=new PedidoDAO();
@@ -32,8 +37,8 @@ public class PanelPedidos extends JPanel {
         top.add(clientes);top.add(desayunos);top.add(cantidad);top.add(metodo);
         JPanel north=new JPanel(new BorderLayout(0,12));north.setOpaque(false);north.add(titulo,BorderLayout.NORTH);north.add(top,BorderLayout.CENTER);
         add(north,BorderLayout.NORTH);
-        tabla.setRowHeight(27);add(new JScrollPane(tabla),BorderLayout.CENTER);
-        JButton agregar=new JButton("Agregar al pedido"),quitar=new JButton("Quitar producto"),guardar=new JButton("Guardar pedido"),limpiar=new JButton("Limpiar"),recargar=new JButton("Recargar listas");
+        Estilo.estilizarTabla(tabla);add(new JScrollPane(tabla),BorderLayout.CENTER);
+        JButton agregar=Estilo.boton("Agregar al pedido",Estilo.NARANJA),quitar=Estilo.boton("Quitar producto",new Color(174,91,85)),guardar=Estilo.boton("Guardar pedido",Estilo.ROSA),limpiar=Estilo.boton("Limpiar",new Color(120,130,120)),recargar=Estilo.boton("Recargar listas",Estilo.NARANJA_OSCURO);
         JPanel south=new JPanel(new BorderLayout());south.setOpaque(false);
         JPanel buttons=new JPanel(new FlowLayout(FlowLayout.LEFT));buttons.setOpaque(false);buttons.add(agregar);buttons.add(quitar);buttons.add(limpiar);buttons.add(recargar);buttons.add(guardar);
         total.setFont(new Font("SansSerif",Font.BOLD,20));total.setForeground(Estilo.NARANJA_OSCURO);
