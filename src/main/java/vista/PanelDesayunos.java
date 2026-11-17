@@ -1,9 +1,16 @@
 package vista;
-import dao.DesayunoDAO; import modelo.Desayuno;
-import javax.swing.*; import javax.swing.border.EmptyBorder; import javax.swing.table.DefaultTableModel;
-import java.awt.*; import java.sql.SQLException; import java.util.List;
+
+import dao.DesayunoDAO;
+import modelo.Desayuno;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.sql.SQLException;
+import java.util.List;
 
 public class PanelDesayunos extends JPanel {
+
     private final DesayunoDAO dao=new DesayunoDAO();
     private final DefaultTableModel tm=new DefaultTableModel(new Object[]{"N.º","ID","Nombre","Precio","Descripción","Disponible"},0){public boolean isCellEditable(int r,int c){return false;}};
     private final JTable tabla=new JTable(tm);
@@ -11,13 +18,12 @@ public class PanelDesayunos extends JPanel {
         JLabel title=new JLabel("Desayunos");title.setFont(Estilo.TITULO);title.setForeground(Estilo.TEXTO);
         JLabel desc=new JLabel("Administra el menú. Los IDs reales se conservan aunque desactives un producto.");desc.setFont(Estilo.NORMAL);desc.setForeground(Estilo.GRIS);
         JPanel head=new JPanel();head.setOpaque(false);head.setLayout(new BoxLayout(head,BoxLayout.Y_AXIS));head.add(title);head.add(Box.createVerticalStrut(5));head.add(desc);
-        tabla.setRowHeight(29);tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);tabla.getTableHeader().setFont(new Font("SansSerif",Font.BOLD,13));
+        Estilo.estilizarTabla(tabla);
         add(head,BorderLayout.NORTH);add(new JScrollPane(tabla),BorderLayout.CENTER);
-        JButton add=boton("Agregar",Estilo.NARANJA),edit=boton("Editar",Estilo.ROSA),disable=boton("Desactivar",new Color(174,91,85)),refresh=boton("Actualizar",new Color(120,130,120));
+        JButton add=Estilo.boton("＋ Agregar desayuno",Estilo.NARANJA),edit=Estilo.boton("Editar",Estilo.ROSA),disable=Estilo.boton("Desactivar",new Color(174,91,85)),refresh=Estilo.boton("↻ Actualizar",new Color(120,130,120));
         JPanel actions=new JPanel(new FlowLayout(FlowLayout.LEFT));actions.setOpaque(false);actions.add(add);actions.add(edit);actions.add(disable);actions.add(refresh);add(actions,BorderLayout.SOUTH);
         add.addActionListener(e->agregar());edit.addActionListener(e->editar());disable.addActionListener(e->desactivar());refresh.addActionListener(e->cargar());cargar();
     }
-    private JButton boton(String t,Color c){JButton b=new JButton(t);b.setBackground(c);b.setForeground(Color.WHITE);b.setFocusPainted(false);return b;}
     private void cargar(){tm.setRowCount(0);try{List<Desayuno> lista=dao.listar();int n=1;for(Desayuno d:lista)tm.addRow(new Object[]{n++,d.getId(),d.getNombre(),String.format("$%.2f",d.getPrecio()),d.getDescripcion(),d.isDisponible()?"Sí":"No"});}
     catch(SQLException e){JOptionPane.showMessageDialog(this,e.getMessage(),"Error MySQL",JOptionPane.ERROR_MESSAGE);}}
     private Desayuno seleccionado(){int r=tabla.getSelectedRow();if(r<0)throw new IllegalArgumentException("Selecciona un desayuno.");int id=(int)tm.getValueAt(r,1);
