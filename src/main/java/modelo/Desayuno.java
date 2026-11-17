@@ -39,4 +39,5 @@ public class Desayuno {
     public void setRuta(String ruta) { this.ruta = ruta; }
     public void setUrlImagen(String urlImagen) { this.urlImagen = urlImagen; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
+    @Override public String toString() { return nombre + " ($" + String.format("%.2f", precio) + ")"; }
 }
