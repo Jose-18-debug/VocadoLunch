@@ -41,7 +41,6 @@ public class PanelInicio extends JPanel {
         bienvenida.setBackground(Color.WHITE);
         bienvenida.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Estilo.BORDE), new EmptyBorder(22, 24, 22, 24)));
-        JLabel logo = cargarLogo(120, 90);
         JPanel texto = new JPanel();
         texto.setOpaque(false);
         texto.setLayout(new BoxLayout(texto, BoxLayout.Y_AXIS));
@@ -60,7 +59,6 @@ public class PanelInicio extends JPanel {
         texto.add(Box.createVerticalStrut(10));
         texto.add(descripcion);
         bienvenida.add(texto, BorderLayout.CENTER);
-        bienvenida.add(logo, BorderLayout.EAST);
 
         JButton actualizar = Estilo.boton("↻ Actualizar estadísticas", Estilo.NARANJA);
         actualizar.addActionListener(e -> actualizarEstadisticas());
@@ -93,14 +91,6 @@ public class PanelInicio extends JPanel {
         JLabel d = new JLabel(detalle); d.setFont(new Font("SansSerif", Font.PLAIN, 11)); d.setForeground(Estilo.GRIS);
         p.add(t); p.add(Box.createVerticalStrut(9)); p.add(valor); p.add(Box.createVerticalStrut(5)); p.add(d);
         return p;
-    }
-
-    private JLabel cargarLogo(int ancho, int alto) {
-        java.net.URL recurso = getClass().getResource("/logo.png");
-        if (recurso == null) return new JLabel("VocadoLunch");
-        ImageIcon original = new ImageIcon(recurso);
-        Image imagen = original.getImage().getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
-        return new JLabel(new ImageIcon(imagen));
     }
 
     public void actualizarEstadisticas() {
