@@ -89,6 +89,23 @@ public class PedidoDAO {
             ps.setInt(1,idPedido); return ps.executeUpdate()>0;
         }
     }
+
+    /** Indicadores del dashboard: pedidos del día, en preparación y ventas pagadas. */
+    public Map<String, Object> resumenDashboardHoy() throws SQLException {
+        String sql = "SELECT COUNT(*) AS pedidos, " +
+                "SUM(CASE WHEN LOWER(estado) IN ('en preparación','en preparacion','en_preparacion') THEN 1 ELSE 0 END) AS preparacion, " +
+                "COALESCE(SUM(CASE WHEN pagado=1 THEN total ELSE 0 END),0) AS ventas " +
+                "FROM pedidos WHERE DATE(STR_TO_DATE(fecha_hora,'%Y-%m-%d %H:%i:%s'))=CURDATE()";
+        try (Connection cn = Conexion.conectar(); PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            Map<String, Object> datos = new HashMap<>();
+            datos.put("pedidos", rs.getInt("pedidos"));
+            datos.put("preparacion", rs.getInt("preparacion"));
+            datos.put("ventas", rs.getDouble("ventas"));
+            return datos;
+        }
+    }
+
     public Map<String,Object> resumenVentasHoy() throws SQLException {
         String sql="SELECT COUNT(*) pedidos,COALESCE(SUM(total),0) total FROM pedidos WHERE pagado=1 AND DATE(STR_TO_DATE(fecha_hora,'%Y-%m-%d %H:%i:%s'))=CURDATE()";
         try(Connection cn=Conexion.conectar(); PreparedStatement ps=cn.prepareStatement(sql); ResultSet rs=ps.executeQuery()){
